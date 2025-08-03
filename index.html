@@ -1,0 +1,117 @@
+import React, { useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useWallet } from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+
+export default function VantAI() {
+  const { publicKey } = useWallet();
+  const [referralLink, setReferralLink] = useState('');
+  const [vantPoints, setVantPoints] = useState(0);
+  const [referrals, setReferrals] = useState(0);
+
+  useEffect(() => {
+    if (publicKey) {
+      const baseUrl = window.location.origin;
+      const ref = new URLSearchParams(window.location.search).get("ref");
+      setReferralLink(`${baseUrl}/?ref=${publicKey.toBase58()}`);
+
+      // Simulated backend logic
+      const savedPoints = localStorage.getItem(`vantPoints-${publicKey.toBase58()}`);
+      const savedRefs = localStorage.getItem(`vantRefs-${publicKey.toBase58()}`);
+      if (!savedPoints) {
+        localStorage.setItem(`vantPoints-${publicKey.toBase58()}`, 20);
+        setVantPoints(20);
+      } else {
+        setVantPoints(parseInt(savedPoints));
+      }
+      if (savedRefs) setReferrals(parseInt(savedRefs));
+
+      if (ref && ref !== publicKey.toBase58()) {
+        const refPoints = localStorage.getItem(`vantPoints-${ref}`);
+        const refCount = localStorage.getItem(`vantRefs-${ref}`);
+        localStorage.setItem(`vantPoints-${ref}`, parseInt(refPoints || 0) + 50);
+        localStorage.setItem(`vantRefs-${ref}`, parseInt(refCount || 0) + 1);
+      }
+    }
+  }, [publicKey]);
+
+  return (
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-start p-8 space-y-12">
+
+      {/* Header Section */}
+      <div className="text-center mt-16">
+        <h1 className="text-5xl font-bold mb-4">Something Big is Coming...</h1>
+        <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+          Introducing <span className="text-purple-500 font-semibold">VantAI</span> — the darkest, smartest memecoin powered by open-source intelligence. Built on the edge of AI and crypto.
+        </p>
+      </div>
+
+      {/* Orb Image */}
+      <div className="w-full flex justify-center">
+        <img src="/vantai-orb.png" alt="VantAI Orb" className="w-[300px] md:w-[400px] rounded-full shadow-xl" />
+      </div>
+
+      {/* Wallet Connect Section */}
+      <Card className="bg-gray-900 shadow-lg max-w-md w-full">
+        <CardContent className="space-y-4 p-6 text-center">
+          <h2 className="text-2xl font-semibold mb-2">Early Access</h2>
+          <p className="text-gray-400">Connect your wallet to reserve your place and get first access to VantAI.</p>
+          <WalletMultiButton className="bg-purple-600 hover:bg-purple-700 w-full justify-center" />
+          {publicKey && (
+            <div className="mt-4 space-y-2">
+              <p className="text-green-400">Connected: {publicKey.toBase58()}</p>
+              <p className="text-gray-400 text-sm">Your referral link:</p>
+              <div className="bg-gray-800 p-2 rounded-lg break-all text-sm text-purple-400 border border-purple-500">
+                {referralLink}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Vant Points Tracker */}
+      {publicKey && (
+        <div className="max-w-md w-full bg-gray-900 p-6 rounded-2xl shadow-xl text-center">
+          <h3 className="text-xl font-bold text-purple-400 mb-2">Your Vant Points</h3>
+          <p className="text-4xl font-bold text-green-300 mb-2">{vantPoints}</p>
+          <p className="text-gray-400">You’ve referred <span className="text-purple-300 font-semibold">{referrals}</span> user(s)</p>
+          <p className="text-sm text-gray-500 mt-2">+20 VANT for signing up · +50 VANT per referral</p>
+        </div>
+      )}
+
+      {/* Features Section */}
+      <div className="max-w-5xl w-full grid md:grid-cols-3 gap-8 mt-12">
+        <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
+          <h3 className="text-xl font-bold text-purple-400 mb-2">Real-Time AI Insights</h3>
+          <p className="text-gray-300">VantAI continuously learns from crypto markets, communities, and social media to give real-time predictions and insights.</p>
+        </div>
+        <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
+          <h3 className="text-xl font-bold text-purple-400 mb-2">Meme Detection Engine</h3>
+          <p className="text-gray-300">Scans the web for viral meme patterns and helps you ride the next trend before it pops.</p>
+        </div>
+        <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
+          <h3 className="text-xl font-bold text-purple-400 mb-2">Token Launch Toolkit</h3>
+          <p className="text-gray-300">Empowers creators with tools to launch tokens, generate hype, and build communities backed by AI.</p>
+        </div>
+      </div>
+
+      {/* About VantAI */}
+      <div className="max-w-3xl text-center space-y-4 mt-20">
+        <h2 className="text-3xl font-bold">What is VantAI?</h2>
+        <p className="text-gray-400">
+          VantAI is more than a memecoin. It’s a decentralized intelligence experiment — an AI entity built on-chain to evolve, adapt, and scale with the crypto world. Designed to empower creators, traders, and builders.
+        </p>
+        <p className="text-gray-400">
+          In the future, VantAI will generate crypto memes, launch automated tokens, analyze communities, and reward early users with exclusive tools.
+        </p>
+      </div>
+
+      {/* GitHub Attribution */}
+      <div className="mt-16 text-sm text-gray-600 text-center">
+        <p>🧠 Powered by Open Source Intelligence • <a href="https://github.com" target="_blank" className="text-purple-500 hover:underline">View on GitHub</a></p>
+      </div>
+
+    </div>
+  );
+}
